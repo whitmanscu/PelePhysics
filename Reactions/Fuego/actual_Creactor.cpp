@@ -1,4 +1,5 @@
 #include <actual_Creactor.h> 
+#include <AMReX_ParmParse.H>
 
 /**********************************/
 
@@ -51,9 +52,8 @@
 /**********************************/
 /* Definitions */
 /* Initialization routine, called once at the begining of the problem */
-int extern_cInit(const int* cvode_meth,const int* cvode_itmeth, 
-		const int* cvode_iJac, const int* cvode_iE,
-		const int* cvode_iDense, const int* Ncells){
+int reactor_init(const int* cvode_iE, const int* Ncells) 
+{ 
 
 	int flag;
 	realtype reltol, time;
@@ -67,8 +67,12 @@ int extern_cInit(const int* cvode_meth,const int* cvode_itmeth,
 	    printf("Nb of spec is %d \n", NEQ);
 	}
 
-	iDense_Creact  = *cvode_iDense;
-	iJac_Creact    = *cvode_iJac;
+	/* ParmParse from the inputs file */
+ 	amrex::ParmParse pp("ns");
+ 	pp.query("cvode_iJac",iJac_Creact);
+	pp.query("cvode_iDense", iDense_Creact);
+
+	/* Args */
 	iE_Creact      = *cvode_iE;
 	NCELLS         = *Ncells;
         neq_tot        = (NEQ + 1) * NCELLS;
@@ -83,13 +87,8 @@ int extern_cInit(const int* cvode_meth,const int* cvode_itmeth,
 
 	/* Call CVodeCreate to create the solver memory and specify the
 	 * Backward Differentiation Formula and the use of a Newton iteration */
-	if ((*cvode_meth == 2) && (*cvode_itmeth == 2))
-	{
-	    cvode_mem = CVodeCreate(CV_BDF);
-	    if (check_flag((void *)cvode_mem, "CVodeCreate", 0)) return(1);
-	} else {
-	    amrex::Abort("\n--> Weird inputs to CVodeCreate. Viable options are CV_BDF (=2), CV_NEWTON (=2)\n");
-	}
+	cvode_mem = CVodeCreate(CV_BDF);
+	if (check_flag((void *)cvode_mem, "CVodeCreate", 0)) return(1);
 
         /* Does not work for more than 1 cell right now */
 	data = AllocUserData();
@@ -254,7 +253,7 @@ int extern_cInit(const int* cvode_meth,const int* cvode_itmeth,
 }
 
 /* Main CVODE call routine */
-int actual_cReact(realtype *rY_in, realtype *rY_src_in, 
+int react(realtype *rY_in, realtype *rY_src_in, 
 		realtype *rX_in, realtype *rX_src_in,
 		realtype *P_in, 
                 realtype *dt_react, realtype *time, int *Init){
@@ -284,6 +283,14 @@ int actual_cReact(realtype *rY_in, realtype *rY_src_in,
 	// rhoY,T
 	std::memcpy(yvec_d, rY_in, sizeof(realtype) * ((NEQ+1)*NCELLS));
 	temperature_save = rY_in[NEQ];
+        if (iverbose > 3) {
+	    double rhov = 0.0;
+            for (int k = 0; k < NEQ; k ++) {
+	    	rhov =  rhov + rY_in[k];
+	    }
+	    printf("BEG : Temperature is %14.6e \n", temperature_save);
+	    printf("BEG : Rho is %14.6e \n", rhov);
+	}
 	// rhoY_src_ext
 	std::memcpy(rYsrc, rY_src_in, (NEQ*NCELLS)*sizeof(double));
 	// rhoE/rhoH
@@ -1230,7 +1237,7 @@ static UserData AllocUserData(void)
 
 
 /* Free memory */
-void extern_cFree(){
+void reactor_close(){
 
   CVodeFree(&cvode_mem);
   SUNLinSolFree(LS);
