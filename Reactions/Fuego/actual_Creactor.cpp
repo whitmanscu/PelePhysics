@@ -311,12 +311,14 @@ int react(realtype *rY_in, realtype *rY_src_in,
         if (iverbose > 1) {
             printf("\n -------------------------------------\n");
 	}
-	if (*Init == 1) {
+	/*if (*Init == 1) {
             if (iverbose > 1) {
                 printf("ReInit always \n");
 	    }
+        */
 	    CVodeReInit(cvode_mem, time_init, y);
 	    InitPartial = false;
+            /*
 	} else {
 	    temp_old = fabs(rY_in[NEQ] - temp_old);
 	    // Sloppy but I can't think of anything better now
@@ -334,6 +336,7 @@ int react(realtype *rY_in, realtype *rY_src_in,
 		InitPartial = true;
 	    }
 	}
+            */
 
 	flag = CVode(cvode_mem, time_out, y, &dummy_time, CV_NORMAL);
 	/* ONE STEP MODE FOR DEBUGGING */
