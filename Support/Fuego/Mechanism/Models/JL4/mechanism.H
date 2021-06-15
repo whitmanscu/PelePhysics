@@ -1967,7 +1967,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE void comp_qfqr(amrex::Real *  qf, amrex
     amrex::Real k_f, k_r, Corr;
 
     // (0):  2.000000 CH4 + O2 => 2.000000 CO + 4.000000 H2
-    k_f = 1.0000000000000002e-12 * 39100000000000 
+    k_f = 3.1622776601683795e-05 * 39100000000000 
                * exp(0 * tc[0] - 0.50321666580471969 * (30000) * invT);
     Corr  = 1.0;
     qf[0] *= Corr * k_f;
@@ -1979,7 +1979,7 @@ AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE void comp_qfqr(amrex::Real *  qf, amrex
     qf[1] *= Corr * k_f;
     qr[1] *= Corr * k_f / (exp(g_RT[0] + g_RT[2] - g_RT[4] - 3.000000*g_RT[6]) * pow(refC,2.000000));
     // (2):  2.000000 H2 + O2 => 2.000000 H2O
-    k_f = 1.0000000000000002e-12 * 6.045e+18 
+    k_f = 3.1622776601683795e-05 * 6.045e+18 
                * exp(-1 * tc[0] - 0.50321666580471969 * (40000) * invT);
     Corr  = 1.0;
     qf[2] *= Corr * k_f;

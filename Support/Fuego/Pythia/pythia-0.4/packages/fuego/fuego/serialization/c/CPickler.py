@@ -1748,8 +1748,11 @@ class CPickler(CMill):
                 KcConv = self._KcConv(mechanism, reaction)
 
                 A, beta, E = reaction.arrhenius
-                dim = self._phaseSpaceUnits(reaction.reactants)
-                thirdBody = reaction.thirdBody
+                if (len(reaction.ford) > 0) :                
+                    dim = self._phaseSpaceUnits(reaction.ford)            
+                else:
+                    dim = self._phaseSpaceUnits(reaction.reactants)
+		thirdBody = reaction.thirdBody
                 low = reaction.low
                 if not thirdBody:
                     uc = self._prefactorUnits(reaction.units["prefactor"], 1-dim) # Case 3 !PD, !TB
